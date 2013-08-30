@@ -19,7 +19,17 @@ $> bundle
 ## Usage
 
 ```ruby
-class UsersController < ActionController::Base
+class ApplicationController < ActionController::Base
+  def current_roles
+    current_user.roles
+  end
+
+  rescue_from(Rolypoly::FailedRoleCheckError) do
+    render text: "Failed Authorization!", status: 401
+  end
+end
+
+class UsersController < ApplicationController
   include Rolypoly::ControllerRoleDSL
 
   def index
@@ -27,7 +37,20 @@ class UsersController < ActionController::Base
   end
   restrict(:index).to(:admin)
   # OR
-  allow(:admin).access_to(:index)
+  allow(:admin).to_access(:index)
+
+  #
+  #
+  #
+  #
+  allow(:scorekeeper, :official).to_access(:show, :score)
+  def show
+    # ...
+  end
+
+  def score
+    # ...
+  end
 end
 ```
 
