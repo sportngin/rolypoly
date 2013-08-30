@@ -6,15 +6,15 @@ Allow certain roles access to certain controller actions.
 
 Add this line to your application's Gemfile:
 
-    gem 'rolypoly'
+```ruby
+gem 'rolypoly'
+```
 
 And then execute:
 
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install rolypoly
+```bash
+$> bundle
+```
 
 ## Usage
 
