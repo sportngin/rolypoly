@@ -14,9 +14,11 @@ module Rolypoly
     describe "setting up with DSL" do
       describe "from allow side" do
         let(:controller_instance) { subject.new }
+        let(:current_roles) { [:admin] }
         before do
           subject.allow(:admin).to_access(:index)
-          controller_instance.stub current_roles: [:admin], action_name: action_name
+          subject.publicize(:landing)
+          controller_instance.stub current_roles: current_roles, action_name: action_name
         end
 
         describe "#index" do
@@ -32,6 +34,22 @@ module Rolypoly
           it "disallows admin access" do
             expect { controller_instance.rolypoly_check_role_access! }
             .to raise_error(Rolypoly::FailedRoleCheckError)
+          end
+        end
+
+        describe "#landing" do
+          let(:action_name) { "landing" }
+          it "allows admin access" do
+            expect { controller_instance.rolypoly_check_role_access! }
+            .not_to raise_error
+          end
+
+          describe "with no role" do
+            let(:current_roles) { [] }
+            it "allows admin access" do
+              expect { controller_instance.rolypoly_check_role_access! }
+              .not_to raise_error
+            end
           end
         end
       end

@@ -1,26 +1,43 @@
+require 'set'
 module Rolypoly
   class RoleGatekeeper
     def initialize(roles, actions)
-      self.roles = Array(roles).map &:to_s
-      self.actions = Array(actions).map &:to_s
+      self.roles = Set.new Array(roles).map(&:to_s)
+      self.actions = Set.new Array(actions).map(&:to_s)
       self.all_actions = false
       self.public = false
     end
 
     # restrict(*actions).to *roles
     def to(*roles)
-      self.roles += roles.flatten.compact.map(&:to_s)
+      self.roles = self.roles.merge roles.flatten.compact.map(&:to_s)
     end
 
+    # make actions public basically
+    # restrict(:index).to_none
+    def to_none
+      self.public = true
+    end
+
+    # allow(*roles).to_access *actions
     def to_access(*actions)
-      self.actions += actions.flatten.compact.map(&:to_s)
+      self.actions = self.actions.merge actions.flatten.compact.map(&:to_s)
+    end
+
+    # allow role access to all actions
+    # allow(*roles).to_all
+    def to_all
+      self.all_actions = true
     end
 
     def allow?(current_roles, action)
-      public? || (
-        action?(action) &&
+      action?(action) &&
         role?(current_roles)
-      )
+    end
+
+    def all_public
+      self.public = true
+      self.all_actions = true
     end
 
     protected # self.attr= gets mad
@@ -30,13 +47,13 @@ module Rolypoly
     attr_accessor :public
 
     def role?(check_roles)
-      check_roles = Array(check_roles).map(&:to_s)
-      !(check_roles & roles).empty?
+      check_roles = Set.new Array(check_roles).map(&:to_s)
+      public? || !(check_roles & roles).empty?
     end
     private :role?
 
     def action?(check_actions)
-      check_actions = Array(check_actions).map(&:to_s)
+      check_actions = Set.new Array(check_actions).map(&:to_s)
       all_actions? || !(check_actions & actions).empty?
     end
     private :action?

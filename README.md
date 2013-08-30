@@ -39,10 +39,7 @@ class UsersController < ApplicationController
   # OR
   allow(:admin).to_access(:index)
 
-  #
-  #
-  #
-  #
+  # Do a bunch at once
   allow(:scorekeeper, :official).to_access(:show, :score)
   def show
     # ...
@@ -51,6 +48,20 @@ class UsersController < ApplicationController
   def score
     # ...
   end
+
+  # Allow admin role to access all actions of this controller
+  allow(:admin).to_all
+
+  # Make action public
+  restrict(:landing).to_none
+  publicize :landing
+
+  def landing
+    # ...
+  end
+
+  # Give up and make all public
+  all_public
 end
 ```
 

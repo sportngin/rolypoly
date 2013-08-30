@@ -41,12 +41,20 @@ module Rolypoly
     private :rolypoly_gatekeepers
 
     module ClassMethods
+      def all_public
+        build_gatekeeper(nil, nil).all_public
+      end
+
       def restrict(*actions)
         build_gatekeeper nil, actions
       end
 
       def allow(*roles)
         build_gatekeeper roles, nil
+      end
+
+      def publicize(*actions)
+        restrict(*actions).to_none
       end
 
       def rolypoly_gatekeepers
