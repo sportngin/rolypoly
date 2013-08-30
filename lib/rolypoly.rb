@@ -1,5 +1,2 @@
 require "rolypoly/version"
-
-module Rolypoly
-  # Your code goes here...
-end
+require 'rolypoly/controller_role_dsl'
