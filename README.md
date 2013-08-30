@@ -1,6 +1,6 @@
 # Rolypoly
 
-TODO: Write a gem description
+Allow certain roles access to certain controller actions.
 
 ## Installation
 
@@ -18,7 +18,18 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+```ruby
+class UsersController < ActionController::Base
+  include Rolypoly::ControllerRoleDSL
+
+  def index
+    # ...
+  end
+  restrict(:index).to(:admin)
+  # OR
+  allow(:admin).access_to(:index)
+end
+```
 
 ## Contributing
 
