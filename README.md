@@ -1,5 +1,8 @@
 # Rolypoly
 
+[![Gem Version](https://badge.fury.io/rb/rolypoly.png)](http://badge.fury.io/rb/rolypoly)
+[![Build Status](https://travis-ci.org/sportngin/rolypoly.png)](https://travis-ci.org/sportngin/rolypoly)
+
 Allow certain roles access to certain controller actions.
 
 ## Installation
