@@ -14,14 +14,14 @@ module Rolypoly
           end
         end
       end
+
+      unless sub.method_defined? :current_roles
+        define_method(:current_roles) { [] }
+      end
     end
 
     def rolypoly_check_role_access!
       failed_role_check! unless rolypoly_role_access?
-    end
-
-    def current_roles # OVERRIDE
-      []
     end
 
     def failed_role_check!
