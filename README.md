@@ -57,6 +57,7 @@ class UsersController < ApplicationController
 
   # Make action public
   restrict(:landing).to_none
+  # OR
   publicize :landing
 
   def landing
