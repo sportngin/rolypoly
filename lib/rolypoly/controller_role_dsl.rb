@@ -41,6 +41,11 @@ module Rolypoly
     private :rolypoly_gatekeepers
 
     module ClassMethods
+      def inherited(sub)
+        super
+        sub.instance_variable_set(:@rolypoly_gatekeepers, rolypoly_gatekeepers.map(&:clone))
+      end
+
       def all_public
         build_gatekeeper(nil, nil).all_public
       end
