@@ -3,7 +3,6 @@ module Rolypoly
   FailedRoleCheckError = Class.new StandardError
   module ControllerRoleDSL
     def self.included(sub)
-      sub.send :extend, ClassMethods
       sub.before_filter(:rolypoly_check_role_access!) if sub.respond_to? :before_filter
       if sub.respond_to? :rescue_from
         sub.rescue_from(FailedRoleCheckError) do
@@ -17,6 +16,13 @@ module Rolypoly
 
       unless sub.method_defined? :current_roles
         define_method(:current_roles) { [] }
+      end
+      sub.send :extend, ClassMethods
+      sub.class_eval do # Sometimes get Stack Too Deep errors if in ClassMethods
+        define_singleton_method :inherited do |sub|
+          super sub
+          sub.instance_variable_set(:@rolypoly_gatekeepers, rolypoly_gatekeepers.map(&:clone))
+        end
       end
     end
 
@@ -41,11 +47,6 @@ module Rolypoly
     private :rolypoly_gatekeepers
 
     module ClassMethods
-      def inherited(sub)
-        super
-        sub.instance_variable_set(:@rolypoly_gatekeepers, rolypoly_gatekeepers.map(&:clone))
-      end
-
       def all_public
         build_gatekeeper(nil, nil).all_public
       end
