@@ -35,9 +35,10 @@ module Rolypoly
     end
 
     def rolypoly_role_access?
-      rolypoly_gatekeepers.any? { |gatekeeper|
-        gatekeeper.allow? current_roles, action_name
-      }
+      rolypoly_gatekeepers.empty? ||
+        rolypoly_gatekeepers.any? { |gatekeeper|
+          gatekeeper.allow? current_roles, action_name
+        }
     end
     private :rolypoly_role_access?
 
