@@ -1,4 +1,9 @@
 require 'spec_helper'
+class RoleObject < Struct.new :name
+  def to_s
+    name.to_s
+  end
+end
 module Rolypoly
   describe ControllerRoleDSL do
     let(:example_controller) do
@@ -14,11 +19,11 @@ module Rolypoly
     describe "setting up with DSL" do
       describe "from allow side" do
         let(:controller_instance) { subject.new }
-        let(:current_roles) { [:admin] }
+        let(:current_user_roles) { [RoleObject.new(:admin), RoleObject.new(:scorekeeper)] }
         before do
           subject.allow(:admin).to_access(:index)
           subject.publicize(:landing)
-          controller_instance.stub current_roles: current_roles, action_name: action_name
+          controller_instance.stub current_user_roles: current_user_roles, action_name: action_name
         end
 
         describe "#index" do
@@ -26,6 +31,9 @@ module Rolypoly
           it "allows admin access" do
             expect { controller_instance.rolypoly_check_role_access! }
             .not_to raise_error
+          end
+          it "can get current_roles from controller" do
+            controller_instance.current_roles.should == [RoleObject.new(:admin)]
           end
         end
 

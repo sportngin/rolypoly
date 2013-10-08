@@ -23,7 +23,7 @@ $> bundle
 
 ```ruby
 class ApplicationController < ActionController::Base
-  def current_roles
+  def current_user_roles
     current_user.roles
   end
 
@@ -65,6 +65,30 @@ class UsersController < ApplicationController
 
   # Give up and make all public
   all_public
+end
+
+# Want some more complex role handling?
+class ProfilesController < ApplicationController
+  allow(:admin).to_access(:index)
+  allow(:owner).to_access(:edit)
+  publicize(:show)
+
+  def index
+    current_roles # => [#<SomeCustomRoleObject to_role_string: "admin", filters: [...]>]
+  end
+
+  def edit # Raises permission error before entering this
+    current_roles # => []
+  end
+
+  def show
+    current_roles # => []
+  end
+
+  def current_user_roles
+    current_user.roles # => [#<SomeCustomRoleObject to_role_string: "admin", filters: [...]>, #<SomeCustomRoleObject to_role_string: "scorekeeper", filters: [...]>]
+  end
+  private :current_user_roles
 end
 ```
 
