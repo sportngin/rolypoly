@@ -46,17 +46,21 @@ module Rolypoly
       self.all_actions = true
     end
 
+    def role?(check_roles)
+      check_roles = Set.new sanitize_role_input(check_roles)
+      public? || !(check_roles & roles).empty?
+    end
+
+    def action?(check_actions)
+      check_actions = Set.new Array(check_actions).map(&:to_s)
+      all_actions? || !(check_actions & actions).empty?
+    end
+
     protected # self.attr= gets mad
     attr_writer :roles
     attr_accessor :actions
     attr_accessor :all_actions
     attr_accessor :public
-
-    def role?(check_roles)
-      check_roles = Set.new sanitize_role_input(check_roles)
-      public? || !(check_roles & roles).empty?
-    end
-    private :role?
 
     def match_roles(check_roles)
       check_roles.reduce([]) { |array, role_object|
@@ -65,12 +69,6 @@ module Rolypoly
       }
     end
     private :match_roles
-
-    def action?(check_actions)
-      check_actions = Set.new Array(check_actions).map(&:to_s)
-      all_actions? || !(check_actions & actions).empty?
-    end
-    private :action?
 
     def sanitize_role_input(role_objects)
       Array(role_objects).map { |r| sanitize_role_object(r) }

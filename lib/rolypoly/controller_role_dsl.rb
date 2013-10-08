@@ -36,11 +36,22 @@ module Rolypoly
 
     def current_roles
       return [] if rolypoly_gatekeepers.empty?
-      rolypoly_gatekeepers.reduce([]) { |array, gatekeeper|
-        if gatekeeper.allow? current_user_roles, action_name
+      current_gatekeepers.reduce([]) { |array, gatekeeper|
+        if gatekeeper.role? current_user_roles
           array += Array(gatekeeper.allowed_roles(current_user_roles, action_name))
         end
         array
+      }
+    end
+
+    def public?
+      return true if rolypoly_gatekeepers.empty?
+      current_gatekeepers.any &:public?
+    end
+
+    def current_gatekeepers
+      rolypoly_gatekeepers.select { |gatekeeper|
+        gatekeeper.action? action_name
       }
     end
 
