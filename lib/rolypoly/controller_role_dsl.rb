@@ -14,8 +14,8 @@ module Rolypoly
         end
       end
 
-      unless sub.method_defined? :current_roles
-        define_method(:current_roles) { [] }
+      unless sub.method_defined? :current_user_roles
+        define_method(:current_user_roles) { [] }
       end
       sub.send :extend, ClassMethods
       sub.class_eval do # Sometimes get Stack Too Deep errors if in ClassMethods
@@ -32,6 +32,27 @@ module Rolypoly
 
     def failed_role_check!
       raise Rolypoly::FailedRoleCheckError
+    end
+
+    def current_roles
+      return [] if rolypoly_gatekeepers.empty?
+      current_gatekeepers.reduce([]) { |array, gatekeeper|
+        if gatekeeper.role? current_user_roles
+          array += Array(gatekeeper.allowed_roles(current_user_roles, action_name))
+        end
+        array
+      }
+    end
+
+    def public?
+      return true if rolypoly_gatekeepers.empty?
+      current_gatekeepers.any &:public?
+    end
+
+    def current_gatekeepers
+      rolypoly_gatekeepers.select { |gatekeeper|
+        gatekeeper.action? action_name
+      }
     end
 
     def rolypoly_role_access?
