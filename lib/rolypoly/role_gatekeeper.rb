@@ -56,6 +56,10 @@ module Rolypoly
       all_actions? || !(check_actions & actions).empty?
     end
 
+    def public?
+      !!public
+    end
+
     protected # self.attr= gets mad
     attr_writer :roles
     attr_accessor :actions
@@ -78,6 +82,7 @@ module Rolypoly
     def sanitize_role_object(role_object)
       role_object.respond_to?(:to_role_string) ? role_object.to_role_string : role_object.to_s
     end
+    private :sanitize_role_object
 
     def can_set_with_to?
       roles.empty?
@@ -88,11 +93,6 @@ module Rolypoly
       actions.empty?
     end
     private :can_set_with_access_to?
-
-    def public?
-      !!public
-    end
-    private :public?
 
     def all_actions?
       !!all_actions

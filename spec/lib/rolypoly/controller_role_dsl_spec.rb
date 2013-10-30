@@ -28,10 +28,16 @@ module Rolypoly
 
         describe "#index" do
           let(:action_name) { "index" }
+
+          it "is not public" do
+            controller_instance.should_not be_public
+          end
+
           it "allows admin access" do
             expect { controller_instance.rolypoly_check_role_access! }
             .not_to raise_error
           end
+
           it "can get current_roles from controller" do
             controller_instance.current_roles.should == [RoleObject.new(:admin)]
           end
@@ -42,6 +48,10 @@ module Rolypoly
           it "disallows admin access" do
             expect { controller_instance.rolypoly_check_role_access! }
             .to raise_error(Rolypoly::FailedRoleCheckError)
+          end
+
+          it "is not public" do
+            controller_instance.should_not be_public
           end
         end
 
@@ -57,6 +67,10 @@ module Rolypoly
             it "allows admin access" do
               expect { controller_instance.rolypoly_check_role_access! }
               .not_to raise_error
+            end
+
+            it "is public" do
+              controller_instance.should be_public
             end
           end
         end
