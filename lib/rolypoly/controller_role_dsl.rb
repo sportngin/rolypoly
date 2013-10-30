@@ -46,7 +46,7 @@ module Rolypoly
 
     def public?
       return true if rolypoly_gatekeepers.empty?
-      current_gatekeepers.any &:public?
+      current_gatekeepers.any? &:public?
     end
 
     def current_gatekeepers
