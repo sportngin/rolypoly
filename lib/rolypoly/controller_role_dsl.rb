@@ -18,12 +18,6 @@ module Rolypoly
         define_method(:current_user_roles) { [] }
       end
       sub.send :extend, ClassMethods
-      sub.class_eval do # Sometimes get Stack Too Deep errors if in ClassMethods
-        define_singleton_method :inherited do |sub|
-          super sub
-          sub.instance_variable_set(:@rolypoly_gatekeepers, rolypoly_gatekeepers.map(&:clone))
-        end
-      end
     end
 
     def rolypoly_check_role_access!
@@ -86,7 +80,14 @@ module Rolypoly
       end
 
       def rolypoly_gatekeepers
-        @rolypoly_gatekeepers ||= []
+        @rolypoly_gatekeepers ||= Array(try_super(__method__))
+      end
+
+      def try_super(mname)
+        if superclass.respond_to?(mname)
+          super_val = superclass.send(mname)
+          super_val.respond_to?(:dup) ? super_val.dup : super_val
+        end
       end
 
       def build_gatekeeper(roles, actions)
