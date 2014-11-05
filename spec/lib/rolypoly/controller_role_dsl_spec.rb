@@ -23,6 +23,8 @@ module Rolypoly
         before do
           subject.allow(:admin).to_access(:index)
           subject.publicize(:landing)
+          subject.publicize(:conditional_yes, if: -> { true })
+          subject.publicize(:conditional_no, if: -> { false })
           controller_instance.stub current_user_roles: current_user_roles, action_name: action_name
         end
 
@@ -72,6 +74,22 @@ module Rolypoly
             it "is public" do
               controller_instance.should be_public
             end
+          end
+        end
+
+        describe "#conditional_yes" do
+          let(:action_name) { "conditional_yes" }
+
+          it "is public" do
+            controller_instance.should be_public
+          end
+        end
+
+        describe "#conditional_no" do
+          let(:action_name) { "conditional_no" }
+
+          it "is not public" do
+            controller_instance.should_not be_public
           end
         end
       end

@@ -76,7 +76,15 @@ module Rolypoly
       end
 
       def publicize(*actions)
-        restrict(*actions).to_none
+        if actions.last.is_a?(Hash)
+          options = actions.pop
+        else
+          options = {}
+        end
+
+        if options[:if].nil? || options[:if].call
+          restrict(*actions).to_none
+        end
       end
 
       def rolypoly_gatekeepers
