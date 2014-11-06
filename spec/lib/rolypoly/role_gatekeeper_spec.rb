@@ -7,6 +7,98 @@ module Rolypoly
 
     subject { described_class.new roles, actions }
 
+    describe "optional conditionals" do
+      subject { described_class.new roles, actions, options }
+
+      describe "if" do
+        describe "string" do
+          let(:options) { { if: "show?" } }
+
+          it "should be true" do
+            controller = double show?: true
+            subject.optional_conditional?(controller).should be_true
+          end
+
+          it "should be false" do
+            controller = double show?: false
+            subject.optional_conditional?(controller).should be_false
+          end
+        end
+
+        describe "symbol" do
+          let(:options) { { if: :show? } }
+
+          it "should be true" do
+            controller = double show?: true
+            subject.optional_conditional?(controller).should be_true
+          end
+
+          it "should be false" do
+            controller = double show?: false
+            subject.optional_conditional?(controller).should be_false
+          end
+        end
+
+        describe "block" do
+          let(:options) { { if: -> { show? } } }
+
+          it "should be true" do
+            controller = double show?: true
+            subject.optional_conditional?(controller).should be_true
+          end
+
+          it "should be false" do
+            controller = double show?: false
+            subject.optional_conditional?(controller).should be_false
+          end
+        end
+      end
+
+      describe "unless" do
+        describe "string" do
+          let(:options) { { unless: "show?" } }
+
+          it "should be false" do
+            controller = double show?: true
+            subject.optional_conditional?(controller).should be_false
+          end
+
+          it "should be true" do
+            controller = double show?: false
+            subject.optional_conditional?(controller).should be_true
+          end
+        end
+
+        describe "symbol" do
+          let(:options) { { unless: :show? } }
+
+          it "should be false" do
+            controller = double show?: true
+            subject.optional_conditional?(controller).should be_false
+          end
+
+          it "should be true" do
+            controller = double show?: false
+            subject.optional_conditional?(controller).should be_true
+          end
+        end
+
+        describe "block" do
+          let(:options) { { unless: -> { show? } } }
+
+          it "should be false" do
+            controller = double show?: true
+            subject.optional_conditional?(controller).should be_false
+          end
+
+          it "should be true" do
+            controller = double show?: false
+            subject.optional_conditional?(controller).should be_true
+          end
+        end
+      end
+    end
+
     shared_examples_for "allow should behave correctly" do
       it "shouldn't auto-allow" do
         subject.allow?(nil, nil).should be_false
@@ -80,7 +172,8 @@ module Rolypoly
         end
       end
     end
-    it_should_behave_like "allow should behave correctly"
+
+    include_examples "allow should behave correctly"
 
     describe "with only roles set" do
       let(:actions) { [] }
@@ -89,7 +182,7 @@ module Rolypoly
         subject.to_access(:index, :show)
       end
 
-      it_should_behave_like "allow should behave correctly"
+      include_examples "allow should behave correctly"
     end
 
     describe "with only actions set" do
@@ -99,7 +192,7 @@ module Rolypoly
         subject.to(:admin, :scorekeeper)
       end
 
-      it_should_behave_like "allow should behave correctly"
+      include_examples "allow should behave correctly"
     end
   end
 end

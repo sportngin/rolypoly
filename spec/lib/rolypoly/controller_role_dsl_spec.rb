@@ -9,6 +9,14 @@ module Rolypoly
     let(:example_controller) do
       Class.new do
         include Rolypoly::ControllerRoleDSL
+
+        def truthy
+          true
+        end
+
+        def falsey
+          false
+        end
       end
     end
     after { example_controller.instance_variable_set("@rolypoly_gatekeepers", nil) }
@@ -23,8 +31,13 @@ module Rolypoly
         before do
           subject.allow(:admin).to_access(:index)
           subject.publicize(:landing)
-          subject.publicize(:conditional_yes, if: -> { true })
-          subject.publicize(:conditional_no, if: -> { false })
+
+          subject.publicize(:conditional_yes, if: -> { truthy })
+          subject.publicize(:conditional_no, if: "falsey" )
+
+          subject.publicize(:unless_conditional_true, unless: -> { truthy })
+          subject.publicize(:unless_conditional_false, unless: "falsey" )
+
           controller_instance.stub current_user_roles: current_user_roles, action_name: action_name
         end
 
@@ -90,6 +103,22 @@ module Rolypoly
 
           it "is not public" do
             controller_instance.should_not be_public
+          end
+        end
+
+        describe "#unless_conditional_true" do
+          let(:action_name) { "unless_conditional_true" }
+
+          it "is public" do
+            controller_instance.should_not be_public
+          end
+        end
+
+        describe "#unless_conditional_false" do
+          let(:action_name) { "unless_conditional_false" }
+
+          it "is not public" do
+            controller_instance.should be_public
           end
         end
       end
