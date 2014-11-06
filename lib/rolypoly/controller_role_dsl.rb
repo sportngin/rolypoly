@@ -44,8 +44,13 @@ module Rolypoly
     end
 
     def current_gatekeepers
-      rolypoly_gatekeepers.select { |gatekeeper|
-        gatekeeper.action? action_name
+      rolypoly_gatekeepers.reduce([]) { |memo, gatekeeper|
+        self_gatekeeper = gatekeeper.dup # avoid tainting static-instances
+        if self_gatekeeper.action?(action_name) && self_gatekeeper.optional_conditional?(self)
+          memo + [self_gatekeeper]
+        else
+          memo
+        end
       }
     end
 
