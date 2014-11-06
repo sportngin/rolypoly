@@ -63,28 +63,37 @@ module Rolypoly
     private :rolypoly_gatekeepers
 
     module ClassMethods
-      def all_public
-        build_gatekeeper(nil, nil).all_public
+      def all_public(options = {})
+        build_gatekeeper(nil, nil, options).all_public
       end
 
       def restrict(*actions)
-        build_gatekeeper nil, actions
+        actions, options = extract_options(actions)
+
+        build_gatekeeper nil, actions, options
       end
 
       def allow(*roles)
-        build_gatekeeper roles, nil
+        roles, options = extract_options(roles)
+
+        build_gatekeeper roles, nil, options
       end
 
       def publicize(*actions)
-        if actions.last.is_a?(Hash)
-          options = actions.pop
+        actions, options = extract_options(actions)
+
+        restrict(*actions, options).to_none
+      end
+
+      def extract_options(array)
+        args = array.dup
+        if args.last.is_a?(Hash)
+          options = args.pop
         else
           options = {}
         end
 
-        if options[:if].nil? || options[:if].call
-          restrict(*actions).to_none
-        end
+        return args, options
       end
 
       def rolypoly_gatekeepers
@@ -98,8 +107,8 @@ module Rolypoly
         end
       end
 
-      def build_gatekeeper(roles, actions)
-        RoleGatekeeper.new(roles, actions).tap { |gatekeeper|
+      def build_gatekeeper(roles, actions, options)
+        RoleGatekeeper.new(roles, actions, options).tap { |gatekeeper|
           rolypoly_gatekeepers << gatekeeper
         }
       end

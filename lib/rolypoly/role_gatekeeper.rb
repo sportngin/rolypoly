@@ -1,33 +1,43 @@
 require 'set'
 module Rolypoly
   class RoleGatekeeper
+    InvalidOptionError = Class.new StandardError
+
     attr_reader :roles
-    def initialize(roles, actions)
+    attr_reader :options
+    attr_accessor :controller
+
+    def initialize(roles, actions, options = {})
       self.roles = Set.new Array(roles).map(&:to_s)
       self.actions = Set.new Array(actions).map(&:to_s)
+      self.options = options || {}
       self.all_actions = false
       self.public = false
     end
 
     # restrict(*actions).to *roles
     def to(*roles)
+      roles = extract_options!(roles)
       self.roles = self.roles.merge roles.flatten.compact.map(&:to_s)
     end
 
     # make actions public basically
     # restrict(:index).to_none
-    def to_none
+    def to_none(*args)
+      extract_options!(args)
       self.public = true
     end
 
     # allow(*roles).to_access *actions
     def to_access(*actions)
+      actions = extract_options!(actions)
       self.actions = self.actions.merge actions.flatten.compact.map(&:to_s)
     end
 
     # allow role access to all actions
     # allow(*roles).to_all
-    def to_all
+    def to_all(*args)
+      extract_options!(args)
       self.all_actions = true
     end
 
@@ -62,6 +72,7 @@ module Rolypoly
 
     protected # self.attr= gets mad
     attr_writer :roles
+    attr_writer :options
     attr_accessor :actions
     attr_accessor :all_actions
     attr_accessor :public
@@ -98,5 +109,25 @@ module Rolypoly
       !!all_actions
     end
     private :all_actions?
+
+    def if_block
+      options[:if] || options["if"]
+    end
+    private :if_block
+
+    def unless_block
+      options[:unless] || options["unless"]
+    end
+    private :unless_block
+
+    def extract_options!(array)
+      args = array.dup
+      if args.last.is_a?(Hash)
+        self.options = self.options.merge(args.pop)
+      end
+
+      return args
+    end
+    private :extract_options!
   end
 end
