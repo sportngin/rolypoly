@@ -70,12 +70,34 @@ module Rolypoly
       !!public
     end
 
+    def optional_conditional?(controller)
+      return true if !(if_block || unless_block)
+
+      if if_block
+        check_controller_block(controller, if_block)
+      else
+        !check_controller_block(controller, unless_block)
+      end
+    end
+
     protected # self.attr= gets mad
     attr_writer :roles
     attr_writer :options
     attr_accessor :actions
     attr_accessor :all_actions
     attr_accessor :public
+
+    def check_controller_block(controller, option)
+      case
+      when option.is_a?(String) || option.is_a?(Symbol)
+        controller.instance_eval(option.to_s)
+      when option.is_a?(Proc)
+        controller.instance_exec(&option)
+      else
+        raise InvalidOptionError, "must pass String, Symbol, or Proc"
+      end
+    end
+    private :check_controller_block
 
     def match_roles(check_roles)
       check_roles.reduce([]) { |array, role_object|
