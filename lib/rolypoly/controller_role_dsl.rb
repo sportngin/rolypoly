@@ -1,4 +1,5 @@
 require 'rolypoly/role_gatekeeper'
+require 'rolypoly/role'
 module Rolypoly
   FailedRoleCheckError = Class.new StandardError
   module ControllerRoleDSL
@@ -72,7 +73,7 @@ module Rolypoly
       end
 
       def allow(*roles)
-        build_gatekeeper roles, nil
+        build_gatekeeper rolypoly_roles(roles), nil
       end
 
       def publicize(*actions)
@@ -89,6 +90,11 @@ module Rolypoly
           super_val.respond_to?(:dup) ? super_val.dup : super_val
         end
       end
+
+      def rolypoly_roles(roles)
+        roles.map { |role| Role.new(role) }  
+      end
+      private :rolypoly_roles
 
       def build_gatekeeper(roles, actions)
         RoleGatekeeper.new(roles, actions).tap { |gatekeeper|
