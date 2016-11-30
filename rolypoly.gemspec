@@ -6,8 +6,8 @@ require 'rolypoly/version'
 Gem::Specification.new do |spec|
   spec.name          = "rolypoly"
   spec.version       = Rolypoly::VERSION
-  spec.authors       = ["Jon Phenow"]
-  spec.email         = ["j.phenow@gmail.com"]
+  spec.authors       = ["Jon Phenow", "Jake Waletzko"]
+  spec.email         = ["j.phenow@gmail.com", "jnwaletzko@gmail.com"]
   spec.description   = %q{Tools for handling per-action and per-app Role authorization}
   spec.summary       = %q{Tools for handling per-action and per-app Role authorization}
   spec.homepage      = "https://github.com/sportngin/rolypoly"
