@@ -23,14 +23,15 @@ module Rolypoly
         before do
           subject.allow(:admin).to_access(:index)
           subject.publicize(:landing)
-          controller_instance.stub current_user_roles: current_user_roles, action_name: action_name
+          allow(controller_instance).to receive(:current_user_roles).and_return(current_user_roles)
+          allow(controller_instance).to receive(:action_name).and_return(action_name)
         end
 
         describe "#index" do
           let(:action_name) { "index" }
 
           it "is not public" do
-            controller_instance.should_not be_public
+            expect(controller_instance).to_not be_public
           end
 
           it "allows admin access" do
@@ -39,7 +40,7 @@ module Rolypoly
           end
 
           it "can get current_roles from controller" do
-            controller_instance.current_roles.should == [RoleObject.new(:admin)]
+            expect(controller_instance.current_roles).to eq([RoleObject.new(:admin)])
           end
         end
 
@@ -51,7 +52,7 @@ module Rolypoly
           end
 
           it "is not public" do
-            controller_instance.should_not be_public
+            expect(controller_instance).to_not be_public
           end
         end
 
@@ -70,7 +71,7 @@ module Rolypoly
             end
 
             it "is public" do
-              controller_instance.should be_public
+              expect(controller_instance).to be_public
             end
           end
         end

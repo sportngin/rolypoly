@@ -9,15 +9,15 @@ module Rolypoly
 
     shared_examples_for "allow should behave correctly" do
       it "shouldn't auto-allow" do
-        subject.allow?(nil, nil).should be false
+        expect(subject.allow?(nil, nil)).to be false
       end
 
       it "should allow scorekeepr access to index" do
-        subject.allow?([:scorekeeper], "index").should be true
+        expect(subject.allow?([:scorekeeper], "index")).to be true
       end
 
       it "should not allow scorekeepr access to edit" do
-        subject.allow?([:scorekeeper], "edit").should be false
+        expect(subject.allow?([:scorekeeper], "edit")).to be false
       end
 
       describe "all public" do
@@ -26,15 +26,15 @@ module Rolypoly
         end
 
         it "should allow whatever" do
-          subject.allow?(nil, nil).should be true
+          expect(subject.allow?(nil, nil)).to be true
         end
 
         it "should allow scorekeepr access to index" do
-          subject.allow?([:scorekeeper], "index").should be true
+          expect(subject.allow?([:scorekeeper], "index")).to be true
         end
 
         it "should allow scorekeepr access to edit" do
-          subject.allow?([:scorekeeper], "edit").should be true
+          expect(subject.allow?([:scorekeeper], "edit")).to be true
         end
       end
 
@@ -44,17 +44,17 @@ module Rolypoly
         end
 
         it "shouldn't auto-allow" do
-          subject.allow?(nil, nil).should be false
+          expect(subject.allow?(nil, nil)).to be false
         end
 
         it "should allow scorekeepr access to index" do
-          subject.allow?([:janitor], "index").should be true
-          subject.allow?([:admin], "index").should be true
+          expect(subject.allow?([:janitor], "index")).to be true
+          expect(subject.allow?([:admin], "index")).to be true
         end
 
-        it "should not allow scorekeepr access to edit" do
-          subject.allow?([:scorekeeper], "edit").should be false
-          subject.allow?([:janitor], "edit").should be false
+        it "to should not allow scorekeepr access to edit" do
+          expect(subject.allow?([:scorekeeper], "edit")).to be false
+          expect(subject.allow?([:janitor], "edit")).to be false
         end
       end
 
@@ -64,19 +64,19 @@ module Rolypoly
         end
 
         it "shouldn't auto-allow" do
-          subject.allow?(nil, nil).should be false
+          expect(subject.allow?(nil, nil)).to be false
         end
 
         it "should allow scorekeepr access to index" do
-          subject.allow?([:scorekeeper], "index").should be true
+          expect(subject.allow?([:scorekeeper], "index")).to be true
         end
 
         it "shouldn't allow janitor access to any" do
-          subject.allow?([:janitor], "index").should be false
+          expect(subject.allow?([:janitor], "index")).to be false
         end
 
         it "should allow scorekeepr access to edit" do
-          subject.allow?([:scorekeeper], "edit").should be true
+          expect(subject.allow?([:scorekeeper], "edit")).to be true
         end
       end
     end
