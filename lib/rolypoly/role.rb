@@ -18,7 +18,7 @@ module Rolypoly
     end
 
     def resource_check_required?
-      resource_type.present? && resource_id.present?
+      !(resource_type.nil? || resource_id.nil?)
     end
     private :resource_check_required?
 

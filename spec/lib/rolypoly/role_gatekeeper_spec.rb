@@ -2,7 +2,9 @@ require 'spec_helper'
 require 'rolypoly/role_gatekeeper'
 module Rolypoly
   describe RoleGatekeeper do
-    let(:roles) { %w[admin scorekeeper] }
+    let(:admin) { Role.new(:admin) }
+    let(:scorekeeper) { Role.new(:scorekeeper) }
+    let(:roles) { [admin, scorekeeper] }
     let(:actions) { %w[index show] }
 
     subject { described_class.new roles, actions }

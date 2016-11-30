@@ -47,7 +47,7 @@ module Rolypoly
     end
 
     def role?(check_roles)
-      public? || check_roles.any? { |check_role| matches_any_role?(check_role) }
+      public? || !check_roles.nil? && check_roles.any? { |check_role| matches_any_role?(check_role) }
     end
 
     def action?(check_actions)
