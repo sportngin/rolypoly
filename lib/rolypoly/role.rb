@@ -17,25 +17,21 @@ module Rolypoly
       resource_match?(role_object)
     end
 
-    def resource_check_required?
+    private def resource_check_required?
       !(resource_type.nil? || resource_id.nil?)
     end
-    private :resource_check_required?
 
-    def resource_match?(role_object)
+    private def resource_match?(role_object)
       return false unless role_object.respond_to?(:resource?)
       role_object.resource?(resource_type, resource_id)
     end
-    private :resource_match?
 
-    def name_match?(role_object)
+    private def name_match?(role_object)
       role_object_name(role_object) == name.to_s
     end
-    private :name_match?
 
-    def role_object_name(role_object)
+    private def role_object_name(role_object)
       role_object.respond_to?(:to_role_string) ? role_object.to_role_string : role_object.to_s
     end
-    private :role_object_name
   end
 end

@@ -65,32 +65,27 @@ module Rolypoly
     attr_accessor :all_actions
     attr_accessor :public
 
-    def matches_any_role?(check_role)
+    private def matches_any_role?(check_role)
       roles.any? { |role| role.matches?(check_role) }
     end
-    private :matches_any_role?
 
-    def match_roles(check_roles)
+    private def match_roles(check_roles)
       check_roles.reduce([]) { |array, role_object|
         array << role_object if matches_any_role?(role_object)
         array
       }
     end
-    private :match_roles
 
-    def can_set_with_to?
+    private def can_set_with_to?
       roles.empty?
     end
-    private :can_set_with_to?
 
-    def can_set_with_access_to?
+    private def can_set_with_access_to?
       actions.empty?
     end
-    private :can_set_with_access_to?
 
-    def all_actions?
+    private def all_actions?
       !!all_actions
     end
-    private :all_actions?
   end
 end

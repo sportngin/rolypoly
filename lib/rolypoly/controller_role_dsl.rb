@@ -50,18 +50,16 @@ module Rolypoly
       }
     end
 
-    def rolypoly_role_access?
+    private def rolypoly_role_access?
       rolypoly_gatekeepers.empty? ||
         rolypoly_gatekeepers.any? { |gatekeeper|
           gatekeeper.allow? current_roles, action_name
         }
     end
-    private :rolypoly_role_access?
 
-    def rolypoly_gatekeepers
+    private def rolypoly_gatekeepers
       self.class.rolypoly_gatekeepers
     end
-    private :rolypoly_gatekeepers
 
     module ClassMethods
       def all_public
@@ -91,22 +89,19 @@ module Rolypoly
         end
       end
 
-      def rolypoly_roles(roles)
+      private def rolypoly_roles(roles)
         roles.map { |role| Role.new(role) }  
       end
-      private :rolypoly_roles
 
-      def build_gatekeeper(roles, actions)
+      private def build_gatekeeper(roles, actions)
         RoleGatekeeper.new(roles, actions).tap { |gatekeeper|
           rolypoly_gatekeepers << gatekeeper
         }
       end
-      private :build_gatekeeper
 
-      def rolypoly_gatekeepers=(arry)
+      private def rolypoly_gatekeepers=(arry)
         @rolypoly_gatekeepers = Array(arry)
       end
-      private :rolypoly_gatekeepers=
     end
   end
 end
