@@ -4,26 +4,21 @@ module Rolypoly
 
     def initialize(role)
       if role.is_a?(Hash)
-        self.name, resources = role.first
-        self.resource_type, self.resource_id = resources.first
+        self.name, self.resource_type = role.first
       else
         self.name = role.to_s
       end
     end
 
-    def matches?(role_object)
+    def matches?(role_object, role_resource)
       return false unless name_match?(role_object)
-      return true unless resource_check_required?
-      resource_match?(role_object)
+      return true if resource_type.nil?
+      role_object.resource?(role_resource)
     end
 
-    private def resource_check_required?
-      !(resource_type.nil? || resource_id.nil?)
-    end
-
-    private def resource_match?(role_object)
+    private def resource_match?(role_object, role_resource)
       return false unless role_object.respond_to?(:resource?)
-      role_object.resource?(resource_type, resource_id)
+      role_object.resource?(role_resource)
     end
 
     private def name_match?(role_object)

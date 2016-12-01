@@ -18,6 +18,10 @@ module Rolypoly
       unless sub.method_defined? :current_user_roles
         define_method(:current_user_roles) { [] }
       end
+
+      unless sub.method_defined? :role_resource
+        define_method(:role_resource) { [] }
+      end
       sub.send :extend, ClassMethods
     end
 
@@ -32,8 +36,8 @@ module Rolypoly
     def current_roles
       return [] if rolypoly_gatekeepers.empty?
       current_gatekeepers.reduce([]) { |array, gatekeeper|
-        if gatekeeper.role? current_user_roles
-          array += Array(gatekeeper.allowed_roles(current_user_roles, action_name))
+        if gatekeeper.role? current_user_roles, role_resource
+          array += Array(gatekeeper.allowed_roles(current_user_roles, action_name, role_resource))
         end
         array
       }
@@ -53,7 +57,7 @@ module Rolypoly
     private def rolypoly_role_access?
       rolypoly_gatekeepers.empty? ||
         rolypoly_gatekeepers.any? { |gatekeeper|
-          gatekeeper.allow? current_roles, action_name
+          gatekeeper.allow?(current_roles, action_name, role_resource)
         }
     end
 

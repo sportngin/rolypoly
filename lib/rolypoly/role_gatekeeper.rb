@@ -31,14 +31,14 @@ module Rolypoly
       self.all_actions = true
     end
 
-    def allow?(current_roles, action)
+    def allow?(current_roles, action, role_resource)
       action?(action) &&
-        role?(current_roles)
+        role?(current_roles, role_resource)
     end
 
-    def allowed_roles(current_roles, action)
+    def allowed_roles(current_roles, action, role_resource)
       return [] if public? || !action?(action)
-      match_roles(current_roles)
+      match_roles(current_roles, role_resource)
     end
 
     def all_public
@@ -46,8 +46,9 @@ module Rolypoly
       self.all_actions = true
     end
 
-    def role?(check_roles)
-      public? || !check_roles.nil? && check_roles.any? { |check_role| matches_any_role?(check_role) }
+    def role?(check_roles, role_resource)
+      return true if public?
+      !check_roles.nil? && check_roles.any? { |check_role| matches_any_role?(check_role, role_resource) }
     end
 
     def action?(check_actions)
@@ -65,13 +66,13 @@ module Rolypoly
     attr_accessor :all_actions
     attr_accessor :public
 
-    private def matches_any_role?(check_role)
-      roles.any? { |role| role.matches?(check_role) }
+    private def matches_any_role?(check_role, role_resource)
+      roles.any? { |role| role.matches?(check_role, role_resource) }
     end
 
-    private def match_roles(check_roles)
+    private def match_roles(check_roles, role_resource)
       check_roles.reduce([]) { |array, role_object|
-        array << role_object if matches_any_role?(role_object)
+        array << role_object if matches_any_role?(role_object, role_resource)
         array
       }
     end
