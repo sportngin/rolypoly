@@ -1,4 +1,5 @@
 require 'rolypoly/role_gatekeeper'
+require 'rolypoly/role'
 module Rolypoly
   FailedRoleCheckError = Class.new StandardError
   module ControllerRoleDSL
@@ -17,6 +18,10 @@ module Rolypoly
       unless sub.method_defined? :current_user_roles
         define_method(:current_user_roles) { [] }
       end
+
+      unless sub.method_defined? :role_resource
+        define_method(:role_resource) { [] }
+      end
       sub.send :extend, ClassMethods
     end
 
@@ -31,8 +36,8 @@ module Rolypoly
     def current_roles
       return [] if rolypoly_gatekeepers.empty?
       current_gatekeepers.reduce([]) { |array, gatekeeper|
-        if gatekeeper.role? current_user_roles
-          array += Array(gatekeeper.allowed_roles(current_user_roles, action_name))
+        if gatekeeper.role? current_user_roles, role_resource
+          array += Array(gatekeeper.allowed_roles(current_user_roles, action_name, role_resource))
         end
         array
       }
@@ -49,18 +54,16 @@ module Rolypoly
       }
     end
 
-    def rolypoly_role_access?
+    private def rolypoly_role_access?
       rolypoly_gatekeepers.empty? ||
         rolypoly_gatekeepers.any? { |gatekeeper|
-          gatekeeper.allow? current_roles, action_name
+          gatekeeper.allow?(current_roles, action_name, role_resource)
         }
     end
-    private :rolypoly_role_access?
 
-    def rolypoly_gatekeepers
+    private def rolypoly_gatekeepers
       self.class.rolypoly_gatekeepers
     end
-    private :rolypoly_gatekeepers
 
     module ClassMethods
       def all_public
@@ -72,7 +75,7 @@ module Rolypoly
       end
 
       def allow(*roles)
-        build_gatekeeper roles, nil
+        build_gatekeeper rolypoly_roles(roles), nil
       end
 
       def publicize(*actions)
@@ -90,17 +93,19 @@ module Rolypoly
         end
       end
 
-      def build_gatekeeper(roles, actions)
+      private def rolypoly_roles(roles)
+        roles.map { |role| Role.new(role) }  
+      end
+
+      private def build_gatekeeper(roles, actions)
         RoleGatekeeper.new(roles, actions).tap { |gatekeeper|
           rolypoly_gatekeepers << gatekeeper
         }
       end
-      private :build_gatekeeper
 
-      def rolypoly_gatekeepers=(arry)
+      private def rolypoly_gatekeepers=(arry)
         @rolypoly_gatekeepers = Array(arry)
       end
-      private :rolypoly_gatekeepers=
     end
   end
 end

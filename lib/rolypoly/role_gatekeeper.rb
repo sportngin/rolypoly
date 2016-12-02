@@ -3,7 +3,7 @@ module Rolypoly
   class RoleGatekeeper
     attr_reader :roles
     def initialize(roles, actions)
-      self.roles = Set.new Array(roles).map(&:to_s)
+      self.roles = Set.new Array(roles)
       self.actions = Set.new Array(actions).map(&:to_s)
       self.all_actions = false
       self.public = false
@@ -11,7 +11,7 @@ module Rolypoly
 
     # restrict(*actions).to *roles
     def to(*roles)
-      self.roles = self.roles.merge roles.flatten.compact.map(&:to_s)
+      self.roles = self.roles.merge roles.map { |role| Role.new(role) }
     end
 
     # make actions public basically
@@ -31,14 +31,14 @@ module Rolypoly
       self.all_actions = true
     end
 
-    def allow?(current_roles, action)
+    def allow?(current_roles, action, role_resource)
       action?(action) &&
-        role?(current_roles)
+        role?(current_roles, role_resource)
     end
 
-    def allowed_roles(current_roles, action)
+    def allowed_roles(current_roles, action, role_resource)
       return [] if public? || !action?(action)
-      match_roles(current_roles)
+      match_roles(current_roles, role_resource)
     end
 
     def all_public
@@ -46,9 +46,9 @@ module Rolypoly
       self.all_actions = true
     end
 
-    def role?(check_roles)
-      check_roles = Set.new sanitize_role_input(check_roles)
-      public? || !(check_roles & roles).empty?
+    def role?(check_roles, role_resource)
+      return true if public?
+      !check_roles.nil? && check_roles.any? { |check_role| matches_any_role?(check_role, role_resource) }
     end
 
     def action?(check_actions)
@@ -66,37 +66,27 @@ module Rolypoly
     attr_accessor :all_actions
     attr_accessor :public
 
-    def match_roles(check_roles)
+    private def matches_any_role?(check_role, role_resource)
+      roles.any? { |role| role.matches?(check_role, role_resource) }
+    end
+
+    private def match_roles(check_roles, role_resource)
       check_roles.reduce([]) { |array, role_object|
-        array << role_object if roles.include?(sanitize_role_object(role_object))
+        array << role_object if matches_any_role?(role_object, role_resource)
         array
       }
     end
-    private :match_roles
 
-    def sanitize_role_input(role_objects)
-      Array(role_objects).map { |r| sanitize_role_object(r) }
-    end
-    private :sanitize_role_input
-
-    def sanitize_role_object(role_object)
-      role_object.respond_to?(:to_role_string) ? role_object.to_role_string : role_object.to_s
-    end
-    private :sanitize_role_object
-
-    def can_set_with_to?
+    private def can_set_with_to?
       roles.empty?
     end
-    private :can_set_with_to?
 
-    def can_set_with_access_to?
+    private def can_set_with_access_to?
       actions.empty?
     end
-    private :can_set_with_access_to?
 
-    def all_actions?
+    private def all_actions?
       !!all_actions
     end
-    private :all_actions?
   end
 end
