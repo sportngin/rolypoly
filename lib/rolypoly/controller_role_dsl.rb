@@ -19,7 +19,7 @@ module Rolypoly
       end
 
       unless sub.method_defined? :role_resource
-        define_method(:role_resource) { [] }
+        define_method(:role_resource) { {} }
       end
       sub.send :extend, ClassMethods
     end

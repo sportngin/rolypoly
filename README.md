@@ -94,9 +94,12 @@ end
 ```
 
 # Allow roles with a resource
-`allow_with_resource` acts similarly to `allow` but requires a resource check to access the endpoint.
+`allow_with_resource` acts similarly to `allow` but executes a resource check on the `SomeCustomerRoleObject` to access the endpoint.
 
-This requires a method to be defined on `SomeCustomRoleObject` that checks if the role_resource object defined on the controller matches the user role. 
+This requires a method to be defined on `SomeCustomRoleObject` that checks if the resource is valid for that role.
+
+The `role_resource` needs to be defined on the controller to pass the resource that the role will be validated against.
+If `role_resource` is not defined it will be defaulted to an empty hash `{}`.
 
 
 ```ruby

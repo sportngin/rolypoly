@@ -4,7 +4,7 @@ module Rolypoly
   describe RoleGatekeeper do
     let(:roles) { %w[admin scorekeeper] }
     let(:actions) { %w[index show] }
-    let(:resource) { [] }
+    let(:resource) { {} }
 
     context "resource not required" do
       subject { described_class.new roles, actions, false }
