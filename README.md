@@ -97,7 +97,7 @@ end
 This requires a method to be defined on `SomeCustomRoleObject` that checks if the role_resource object defined on the controller matches the user role. 
 
 
-```
+```ruby
 class SomeCustomRoleObject
   def resource?(resource)
     self.resources.includes?(resource)
