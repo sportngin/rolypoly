@@ -2,10 +2,10 @@ require 'set'
 module Rolypoly
   class RoleGatekeeper
     attr_reader :roles
-    def initialize(roles, actions, require_resouce)
+    def initialize(roles, actions, require_resource)
       self.roles = Set.new Array(roles).map(&:to_s)
       self.actions = Set.new Array(actions).map(&:to_s)
-      self.require_resouce = require_resouce
+      self.require_resource = require_resource
       self.all_actions = false
       self.public = false
     end
@@ -48,7 +48,7 @@ module Rolypoly
     end
 
     def role?(check_roles, role_resource)
-      check_roles = filter_roles_by_resource(check_roles, role_resource) if require_resouce
+      check_roles = filter_roles_by_resource(check_roles, role_resource)
       check_roles = Set.new sanitize_role_input(check_roles)
       public? || !(check_roles & roles).empty?
     end
@@ -67,10 +67,10 @@ module Rolypoly
     attr_accessor :actions
     attr_accessor :all_actions
     attr_accessor :public
-    attr_accessor :require_resouce
+    attr_accessor :require_resource
 
     def match_roles(check_roles, role_resource)
-      check_roles = filter_roles_by_resource(check_roles, role_resource) if require_resouce
+      check_roles = filter_roles_by_resource(check_roles, role_resource)
       check_roles.reduce([]) { |array, role_object|
         array << role_object if roles.include?(sanitize_role_object(role_object))
         array
@@ -79,6 +79,7 @@ module Rolypoly
     private :match_roles
 
     def filter_roles_by_resource(check_roles, role_resource)
+      return check_roles unless require_resource
       check_roles.select do |check_role|
         check_role.respond_to?(:resource?) && check_role.resource?(role_resource)
       end

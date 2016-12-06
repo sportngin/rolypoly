@@ -68,15 +68,15 @@ module Rolypoly
 
     module ClassMethods
       def all_public
-        build_gatekeeper(nil, nil, false).all_public
+        build_gatekeeper(nil, nil).all_public
       end
 
       def restrict(*actions)
-        build_gatekeeper nil, actions, false
+        build_gatekeeper nil, actions
       end
 
       def allow(*roles)
-        build_gatekeeper roles, nil, false
+        build_gatekeeper roles, nil
       end
 
       def allow_with_resource(*roles)
@@ -98,7 +98,7 @@ module Rolypoly
         end
       end
 
-      def build_gatekeeper(roles, actions, require_resource)
+      def build_gatekeeper(roles, actions, require_resource = false)
         RoleGatekeeper.new(roles, actions, require_resource).tap { |gatekeeper|
           rolypoly_gatekeepers << gatekeeper
         }
