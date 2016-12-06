@@ -15,6 +15,7 @@ module Rolypoly
     subject { example_controller }
     it { should respond_to :restrict }
     it { should respond_to :allow }
+    it { should respond_to :allow_with_resource }
 
     describe "setting up with DSL" do
       describe "from allow side" do
