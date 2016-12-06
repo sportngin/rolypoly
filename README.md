@@ -93,6 +93,44 @@ class ProfilesController < ApplicationController
 end
 ```
 
+# Allow roles with a resource
+This requires a method to be defined on `SomeCustomRoleObject` that checks if the role_resource object defined on the controller matches the user role. 
+
+
+```
+class SomeCustomRoleObject
+  def resource?(resource)
+    self.resources.includes?(resource)
+  end
+end
+
+class ProfilesController < ApplicationController
+  allow_with_resource(:admin).to_access(:index)
+  allow_with_resource(:owner).to_access(:edit)
+  publicize(:show)
+
+  def index
+    current_roles # => [#<SomeCustomRoleObject to_role_string: "admin", resource?: true >]
+  end
+
+  def edit # Raises permission error before entering this
+    current_roles # => []
+  end
+
+  def show
+    current_roles # => []
+  end
+
+  private def current_user_roles
+    current_user.roles # => [#<SomeCustomRoleObject to_role_string: "admin", resource?: true>, #<SomeCustomRoleObject to_role_string: "scorekeeper", resource?: false>]
+  end
+
+  private def role_resource
+    { resource: params[:resource_id] }
+  end
+end
+```
+
 ## Contributing
 
 1. Fork it
