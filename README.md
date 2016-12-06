@@ -94,6 +94,8 @@ end
 ```
 
 # Allow roles with a resource
+`allow_with_resource` acts similarly to `allow` but requires a resource check to access the endpoint.
+
 This requires a method to be defined on `SomeCustomRoleObject` that checks if the role_resource object defined on the controller matches the user role. 
 
 
