@@ -116,31 +116,31 @@ module Rolypoly
     end
 
     context "resource required" do
-      let(:scorekeeper) do
-        scorekeeper = double("scorekeeper")
-        allow(scorekeeper).to receive(:resource?).and_return false
-        allow(scorekeeper).to receive(:to_role_string).and_return "scorekeeper"
-        scorekeeper
-      end
+      let(:scorekeeper_role) { RoleObject.new(:scorekeeper) }
 
       subject { described_class.new roles, actions, true }
 
       describe "resource does not match" do
+        before do
+          allow(scorekeeper_role).to receive(:resource?).and_return false
+          allow(scorekeeper_role).to receive(:to_role_string).and_return "scorekeeper"
+        end 
+
         it { expect(subject.allow?(nil, nil, resource)).to be false }
-        it { expect(subject.allow?([scorekeeper], "index", resource)).to be false }
-        it { expect(subject.allow?([scorekeeper], "edit", resource)).to be false }
+        it { expect(subject.allow?([scorekeeper_role], "index", resource)).to be false }
+        it { expect(subject.allow?([scorekeeper_role], "edit", resource)).to be false }
       end
 
       describe "resource matches" do
         let(:resource) { {resource: 123} }
 
         before do
-          allow(scorekeeper).to receive(:resource?).and_return true
+          allow(scorekeeper_role).to receive(:resource?).and_return true
         end
 
         it { expect(subject.allow?(nil, nil, resource)).to be false }
-        it { expect(subject.allow?([scorekeeper], "index", resource)).to be true }
-        it { expect(subject.allow?([scorekeeper], "edit", resource)).to be false }
+        it { expect(subject.allow?([scorekeeper_role], "index", resource)).to be true }
+        it { expect(subject.allow?([scorekeeper_role], "edit", resource)).to be false }
       end
     end
   end
