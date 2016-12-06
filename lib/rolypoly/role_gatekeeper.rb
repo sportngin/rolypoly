@@ -79,7 +79,7 @@ module Rolypoly
     private :match_roles
 
     def filter_roles_by_resource(check_roles, resource)
-      return check_roles unless require_resource
+      return check_roles if check_roles.nil? || !require_resource
       check_roles.select do |check_role|
         check_role.respond_to?(:resource?) && check_role.resource?(resource)
       end
