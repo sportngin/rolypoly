@@ -32,14 +32,14 @@ module Rolypoly
       self.all_actions = true
     end
 
-    def allow?(current_roles, action, role_resource)
+    def allow?(current_roles, action, resource)
       action?(action) &&
-        role?(current_roles, role_resource)
+        role?(current_roles, resource)
     end
 
-    def allowed_roles(current_roles, action, role_resource)
+    def allowed_roles(current_roles, action, resource)
       return [] if public? || !action?(action)
-      match_roles(current_roles, role_resource)
+      match_roles(current_roles, resource)
     end
 
     def all_public
@@ -47,8 +47,8 @@ module Rolypoly
       self.all_actions = true
     end
 
-    def role?(check_roles, role_resource)
-      check_roles = filter_roles_by_resource(check_roles, role_resource)
+    def role?(check_roles, resource)
+      check_roles = filter_roles_by_resource(check_roles, resource)
       check_roles = Set.new sanitize_role_input(check_roles)
       public? || !(check_roles & roles).empty?
     end
@@ -69,8 +69,8 @@ module Rolypoly
     attr_accessor :public
     attr_accessor :require_resource
 
-    def match_roles(check_roles, role_resource)
-      check_roles = filter_roles_by_resource(check_roles, role_resource)
+    def match_roles(check_roles, resource)
+      check_roles = filter_roles_by_resource(check_roles, resource)
       check_roles.reduce([]) { |array, role_object|
         array << role_object if roles.include?(sanitize_role_object(role_object))
         array
@@ -78,10 +78,10 @@ module Rolypoly
     end
     private :match_roles
 
-    def filter_roles_by_resource(check_roles, role_resource)
+    def filter_roles_by_resource(check_roles, resource)
       return check_roles unless require_resource
       check_roles.select do |check_role|
-        check_role.respond_to?(:resource?) && check_role.resource?(role_resource)
+        check_role.respond_to?(:resource?) && check_role.resource?(resource)
       end
     end
     private :filter_roles_by_resource
