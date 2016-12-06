@@ -77,6 +77,55 @@ module Rolypoly
           end
         end
       end
+
+      describe "from allow_with_resource side" do
+        let(:controller_instance) { subject.new }
+        let(:admin_role) do
+          admin = RoleObject.new(:admin)
+          allow(admin).to receive(:resource?).and_return true
+          admin
+        end
+        let(:scorekeeper_role) { RoleObject.new(:scorekeeper) }
+        let(:current_user_roles) { [admin_role, scorekeeper_role] }
+        let(:role_resource) { {resource: 123} }
+        let(:check_access) { controller_instance.rolypoly_check_role_access! }
+
+        before do
+          subject.allow_with_resource(:admin).to_access(:index)
+          subject.publicize(:landing)
+          allow(controller_instance).to receive(:current_user_roles).and_return(current_user_roles)
+          allow(controller_instance).to receive(:action_name).and_return(action_name)
+          allow(controller_instance).to receive(:role_resource).and_return(action_name)
+        end
+
+        describe "#index" do
+          let(:action_name) { "index" }
+
+          it { expect(controller_instance).to_not be_public }
+          it { expect{ check_access }.not_to raise_error }
+          it { expect(controller_instance.current_roles).to eq([RoleObject.new(:admin)])}
+        end
+
+        describe "#show" do
+          let(:action_name) { "show" }
+          
+          it { expect{ check_access }.to raise_error(Rolypoly::FailedRoleCheckError)}
+          it { expect(controller_instance).to_not be_public }
+        end
+
+        describe "#landing" do
+          let(:action_name) { "landing" }
+
+          it { expect{ check_access }.not_to raise_error }
+
+          describe "with no role" do
+            let(:current_roles) { [] }
+
+            it { expect { check_access }.not_to raise_error }
+            it { expect(controller_instance).to be_public }
+          end
+        end
+      end
     end
   end
 end

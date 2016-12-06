@@ -132,7 +132,7 @@ module Rolypoly
       end
 
       describe "resource matches" do
-        let(:resource) { {organization: 530} }
+        let(:resource) { {resource: 123} }
 
         before do
           allow(scorekeeper).to receive(:resource?).and_return true
