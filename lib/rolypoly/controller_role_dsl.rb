@@ -17,6 +17,10 @@ module Rolypoly
       unless sub.method_defined? :current_user_roles
         define_method(:current_user_roles) { [] }
       end
+
+      unless sub.method_defined? :role_resource
+        define_method(:role_resource) { {} }
+      end
       sub.send :extend, ClassMethods
     end
 
@@ -31,8 +35,8 @@ module Rolypoly
     def current_roles
       return [] if rolypoly_gatekeepers.empty?
       current_gatekeepers.reduce([]) { |array, gatekeeper|
-        if gatekeeper.role? current_user_roles
-          array += Array(gatekeeper.allowed_roles(current_user_roles, action_name))
+        if gatekeeper.role?(current_user_roles, role_resource)
+          array += Array(gatekeeper.allowed_roles(current_user_roles, action_name, role_resource))
         end
         array
       }
@@ -52,7 +56,7 @@ module Rolypoly
     def rolypoly_role_access?
       rolypoly_gatekeepers.empty? ||
         rolypoly_gatekeepers.any? { |gatekeeper|
-          gatekeeper.allow? current_roles, action_name
+          gatekeeper.allow?(current_roles, action_name, role_resource)
         }
     end
     private :rolypoly_role_access?
@@ -75,6 +79,10 @@ module Rolypoly
         build_gatekeeper roles, nil
       end
 
+      def allow_with_resource(*roles)
+        build_gatekeeper roles, nil, true
+      end
+
       def publicize(*actions)
         restrict(*actions).to_none
       end
@@ -90,8 +98,8 @@ module Rolypoly
         end
       end
 
-      def build_gatekeeper(roles, actions)
-        RoleGatekeeper.new(roles, actions).tap { |gatekeeper|
+      def build_gatekeeper(roles, actions, require_resource = false)
+        RoleGatekeeper.new(roles, actions, require_resource).tap { |gatekeeper|
           rolypoly_gatekeepers << gatekeeper
         }
       end

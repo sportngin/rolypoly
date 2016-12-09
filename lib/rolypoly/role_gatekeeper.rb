@@ -2,9 +2,10 @@ require 'set'
 module Rolypoly
   class RoleGatekeeper
     attr_reader :roles
-    def initialize(roles, actions)
+    def initialize(roles, actions, require_resource)
       self.roles = Set.new Array(roles).map(&:to_s)
       self.actions = Set.new Array(actions).map(&:to_s)
+      self.require_resource = require_resource
       self.all_actions = false
       self.public = false
     end
@@ -31,14 +32,14 @@ module Rolypoly
       self.all_actions = true
     end
 
-    def allow?(current_roles, action)
+    def allow?(current_roles, action, resource)
       action?(action) &&
-        role?(current_roles)
+        role?(current_roles, resource)
     end
 
-    def allowed_roles(current_roles, action)
+    def allowed_roles(current_roles, action, resource)
       return [] if public? || !action?(action)
-      match_roles(current_roles)
+      match_roles(current_roles, resource)
     end
 
     def all_public
@@ -46,7 +47,8 @@ module Rolypoly
       self.all_actions = true
     end
 
-    def role?(check_roles)
+    def role?(check_roles, resource)
+      check_roles = filter_roles_by_resource(check_roles, resource)
       check_roles = Set.new sanitize_role_input(check_roles)
       public? || !(check_roles & roles).empty?
     end
@@ -65,14 +67,24 @@ module Rolypoly
     attr_accessor :actions
     attr_accessor :all_actions
     attr_accessor :public
+    attr_accessor :require_resource
 
-    def match_roles(check_roles)
+    def match_roles(check_roles, resource)
+      check_roles = filter_roles_by_resource(check_roles, resource)
       check_roles.reduce([]) { |array, role_object|
         array << role_object if roles.include?(sanitize_role_object(role_object))
         array
       }
     end
     private :match_roles
+
+    def filter_roles_by_resource(check_roles, resource)
+      return check_roles if check_roles.nil? || !require_resource
+      check_roles.select do |check_role|
+        check_role.respond_to?(:resource?) && check_role.resource?(resource)
+      end
+    end
+    private :filter_roles_by_resource
 
     def sanitize_role_input(role_objects)
       Array(role_objects).map { |r| sanitize_role_object(r) }
