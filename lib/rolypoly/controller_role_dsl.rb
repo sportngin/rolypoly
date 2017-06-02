@@ -1,7 +1,11 @@
-require 'rolypoly/role_gatekeeper'
+require 'rolypoly/role_dsl'
+
 module Rolypoly
   FailedRoleCheckError = Class.new StandardError
   module ControllerRoleDSL
+
+    include RoleDSL::InstanceMethods
+
     def self.included(sub)
       sub.before_filter(:rolypoly_check_role_access!) if sub.respond_to? :before_filter
       if sub.respond_to? :rescue_from
@@ -14,14 +18,7 @@ module Rolypoly
         end
       end
 
-      unless sub.method_defined? :current_user_roles
-        define_method(:current_user_roles) { [] }
-      end
-
-      unless sub.method_defined? :rolypoly_resource_map
-        define_method(:rolypoly_resource_map) { {} }
-      end
-      sub.send :extend, ClassMethods
+      sub.extend(ClassMethods)
     end
 
     def rolypoly_check_role_access!
@@ -33,16 +30,11 @@ module Rolypoly
     end
 
     def current_roles
-      return [] if rolypoly_gatekeepers.empty?
-      current_gatekeepers.reduce([]) { |array, gatekeeper|
-        array += Array(gatekeeper.allowed_roles(current_user_roles, action_name, rolypoly_resource_map))
-        array
-      }
+      allowed_roles(action_name)
     end
 
     def public?
-      return true if rolypoly_gatekeepers.empty?
-      current_gatekeepers.any? &:public?
+      super(action_name)
     end
 
     def current_gatekeepers
@@ -51,62 +43,21 @@ module Rolypoly
       }
     end
 
-    def rolypoly_role_access?
-      rolypoly_gatekeepers.empty? ||
-        rolypoly_gatekeepers.any? { |gatekeeper|
-          gatekeeper.allow?(current_roles, action_name, rolypoly_resource_map)
-        }
+    def allow?(options = {})
+      rolypoly_gatekeepers.allow?(current_roles, action_name, rolypoly_resource_map.merge(options))
     end
-    private :rolypoly_role_access?
 
-    def rolypoly_gatekeepers
-      self.class.rolypoly_gatekeepers
+    private def rolypoly_role_access?
+      allow?
     end
-    private :rolypoly_gatekeepers
 
     module ClassMethods
-      def all_public
-        build_gatekeeper(nil, nil).all_public
-      end
+      include RoleDSL::ClassMethods
 
-      def restrict(*actions)
-        build_gatekeeper nil, actions
+      private def rolypoly_gatekeepers=(arry)
+        @rolypoly_gatekeepers = Rolypoly::RoleGatekeepers.new(arry)
       end
-
-      def allow(*roles)
-        build_gatekeeper roles, nil
-      end
-
-      def on(resource)
-        build_gatekeeper nil, nil, resource
-      end
-
-      def publicize(*actions)
-        restrict(*actions).to_none
-      end
-
-      def rolypoly_gatekeepers
-        @rolypoly_gatekeepers ||= Array(try_super(__method__))
-      end
-
-      def try_super(mname)
-        if superclass.respond_to?(mname)
-          super_val = superclass.send(mname)
-          super_val.respond_to?(:dup) ? super_val.dup : super_val
-        end
-      end
-
-      def build_gatekeeper(roles, actions, resource = nil)
-        RoleGatekeeper.new(roles, actions, resource).tap { |gatekeeper|
-          rolypoly_gatekeepers << gatekeeper
-        }
-      end
-      private :build_gatekeeper
-
-      def rolypoly_gatekeepers=(arry)
-        @rolypoly_gatekeepers = Array(arry)
-      end
-      private :rolypoly_gatekeepers=
     end
+
   end
 end

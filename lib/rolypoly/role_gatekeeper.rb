@@ -10,6 +10,11 @@ module Rolypoly
       self.public = false
     end
 
+    def initialize_copy(other)
+      @roles = @roles.dup
+      @actions = @actions.dup
+    end
+
     # on(resource).allow(*roles).to_access(*actions)
     def allow(*roles)
       to(*roles)
