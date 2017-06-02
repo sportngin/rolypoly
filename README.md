@@ -98,8 +98,8 @@ end
 
 This requires a method to be defined on `SomeCustomRoleObject` that checks if the resource is valid for that role.
 
-The `role_resource` needs to be defined on the controller to pass the resource that the role will be validated against.
-If `role_resource` is not defined it will be defaulted to an empty hash `{}`.
+The `rolypoly_resource_map` needs to be defined on the controller to pass the resources that the role will be validated against.
+If `rolypoly_resource_map` is not defined it will be defaulted to an empty hash `{}`.
 
 
 ```ruby
@@ -110,8 +110,8 @@ class SomeCustomRoleObject
 end
 
 class ProfilesController < ApplicationController
-  allow_with_resource(:admin).to_access(:index)
-  allow_with_resource(:owner).to_access(:edit)
+  allow(:admin).on(:organization).to_access(:index)
+  allow(:owner).on(:profile).to_access(:edit)
   publicize(:show)
 
   def index
@@ -130,8 +130,11 @@ class ProfilesController < ApplicationController
     current_user.roles # => [#<SomeCustomRoleObject to_role_string: "admin", resource?: true>, #<SomeCustomRoleObject to_role_string: "scorekeeper", resource?: false>]
   end
 
-  private def role_resource
-    { resource: params[:resource_id] }
+  private def rolypoly_resource_map
+    {
+      organization: ['Organization', tournament.org_id]
+      tournament: tournament
+    }
   end
 end
 ```
