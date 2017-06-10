@@ -19,7 +19,62 @@ And then execute:
 $> bundle
 ```
 
-## Usage
+## Custom Usage
+
+```ruby
+role_checker = Rolypoly.define_gatekeepers do
+  allow(:super_duper_admin).to_all
+  allow(:super_admin).on(:organization).to_all
+  allow(:admin).on(:team).to_access(:show, :update)
+end
+
+role_checker_options = {
+  organization: ['Organization', team.organization_id],
+  team: team
+}
+
+role_checker.allow?(role_objects, :destroy, role_checker_options)
+role_checker.allow?(role_objects, :destroy, role_checker_options)
+```
+
+## Policy Usage
+
+```ruby
+class TeamPolicy < Struct.new(:user, :team)
+
+  include Rolypoly::RoleDSL
+
+  allow(:super_duper_admin).to_all
+  allow(:super_admin).on(:organization).to_all
+  allow(:admin).on(:team).to_access(:show, :update)
+
+  def show?
+    allow?(:show)
+  end
+
+  def update?
+    allow?(:update)
+  end
+
+  def destroy?
+    allow?(:destroy)
+  end
+
+  def current_user_roles
+    current_user.role_assignments
+  end
+
+  def rolypoly_resource_map
+    {
+      organization: ['Organization', team.organization_id]
+      team: team
+    }
+  end
+
+end
+```
+
+## Controller Usage
 
 ```ruby
 class ApplicationController < ActionController::Base
