@@ -5,6 +5,13 @@
 #
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 require 'rolypoly'
+
+class RoleObject < Struct.new(:name)
+  def to_s
+    name.to_s
+  end
+end
+
 RSpec.configure do |config|
   config.run_all_when_everything_filtered = true
   config.filter_run :focus

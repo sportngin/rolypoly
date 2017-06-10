@@ -1,9 +1,5 @@
 require 'spec_helper'
-class RoleObject < Struct.new :name
-  def to_s
-    name.to_s
-  end
-end
+
 module Rolypoly
   describe ControllerRoleDSL do
     let(:example_controller) do
