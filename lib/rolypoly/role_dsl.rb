@@ -42,6 +42,7 @@ module Rolypoly
       extend Forwardable
 
       def inherited(subclass)
+        super
         subclass.instance_variable_set('@rolypoly_gatekeepers', rolypoly_gatekeepers.dup)
       end
 
