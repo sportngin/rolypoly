@@ -1,9 +1,5 @@
 require 'spec_helper'
-class RoleObject < Struct.new :name
-  def to_s
-    name.to_s
-  end
-end
+
 module Rolypoly
   describe ControllerRoleDSL do
     let(:example_controller) do
@@ -15,7 +11,7 @@ module Rolypoly
     subject { example_controller }
     it { should respond_to :restrict }
     it { should respond_to :allow }
-    it { should respond_to :allow_with_resource }
+    it { should respond_to :on }
 
     describe "setting up with DSL" do
       describe "from allow side" do
@@ -78,21 +74,21 @@ module Rolypoly
         end
       end
 
-      describe "from allow_with_resource side" do
+      describe "from on side" do
         let(:controller_instance) { subject.new }
         let(:admin_role) { RoleObject.new(:admin) }
         let(:scorekeeper_role) { RoleObject.new(:scorekeeper) }
         let(:current_user_roles) { [admin_role, scorekeeper_role] }
-        let(:role_resource) { {resource: 123} }
+        let(:rolypoly_resource_map) { { organization: ['Organization', 123] } }
         let(:check_access!) { controller_instance.rolypoly_check_role_access! }
 
         before do
-          subject.allow_with_resource(:admin).to_access(:index)
+          subject.on(:organization).allow(:admin).to_access(:index)
           subject.publicize(:landing)
-          allow(admin_role).to receive(:resource?).and_return true
+          allow(admin_role).to receive(:resource?).with(rolypoly_resource_map[:organization]).and_return true
           allow(controller_instance).to receive(:current_user_roles).and_return(current_user_roles)
           allow(controller_instance).to receive(:action_name).and_return(action_name)
-          allow(controller_instance).to receive(:role_resource).and_return(role_resource)
+          allow(controller_instance).to receive(:rolypoly_resource_map).and_return(rolypoly_resource_map)
         end
 
         describe "#index" do
