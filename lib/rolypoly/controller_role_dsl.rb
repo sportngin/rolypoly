@@ -31,6 +31,8 @@ module Rolypoly
       end
 
       def current_roles
+        return [] if rolypoly_gatekeepers.empty?
+
         allowed_roles(action_name)
       end
 
