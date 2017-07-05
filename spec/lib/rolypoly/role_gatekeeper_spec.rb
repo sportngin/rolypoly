@@ -119,41 +119,75 @@ module Rolypoly
 
       subject { described_class.new roles, actions, :resource }
 
-      describe "resource does not match" do
-        before do
-          allow(scorekeeper_role).to receive(:resource?).with(nil).and_return false
-          allow(scorekeeper_role).to receive(:to_role_string).and_return 'scorekeeper'
+      context 'with no resource' do
+        describe "resource does not match" do
+          before do
+            allow(scorekeeper_role).to receive(:resource?).with(nil).and_return false
+            allow(scorekeeper_role).to receive(:to_role_string).and_return 'scorekeeper'
+          end
+
+          it { expect(subject.allow?(nil, nil)).to be false }
+          it { expect(subject.allow?(scorekeeper_role, :index)).to be false }
+          it { expect(subject.allow?(scorekeeper_role, :edit)).to be false }
+        end
+      end
+
+      context 'with resource' do
+        describe "resource does not match" do
+          let(:resource) { { resource: ['Organization', 123] } }
+
+          before do
+            allow(scorekeeper_role).to receive(:resource?).with(resource[:resource]).and_return false
+            allow(scorekeeper_role).to receive(:to_role_string).and_return "scorekeeper"
+          end
+
+          it { expect(subject.allow?(nil, nil, resource)).to be false }
+          it { expect(subject.allow?([scorekeeper_role], "index", resource)).to be false }
+          it { expect(subject.allow?([scorekeeper_role], "edit", resource)).to be false }
         end
 
-        it { expect(subject.allow?(nil, nil)).to be false }
-        it { expect(subject.allow?(scorekeeper_role, :index)).to be false }
-        it { expect(subject.allow?(scorekeeper_role, :edit)).to be false }
+        describe "resource matches" do
+          let(:resource) { { resource: ['Organization', 123] } }
+
+          before do
+            allow(scorekeeper_role).to receive(:resource?).with(resource[:resource]).and_return true
+          end
+
+          it { expect(subject.allow?(nil, nil, resource)).to be false }
+          it { expect(subject.allow?([scorekeeper_role], "index", resource)).to be true }
+          it { expect(subject.allow?([scorekeeper_role], "edit", resource)).to be false }
+        end
       end
 
-      describe "resource does not match" do
-        let(:resource) { { resource: ['Organization', 123] } }
+      context 'with resources' do
+        let(:first_resource) { ['Organization', 1] }
+        let(:second_resource) { ['Organization', 123] }
+        let(:resource) { { resource: [first_resource, second_resource] } }
 
-        before do
-          allow(scorekeeper_role).to receive(:resource?).with(resource[:resource]).and_return false
-          allow(scorekeeper_role).to receive(:to_role_string).and_return "scorekeeper"
-        end 
+        describe 'none of the resources match' do
+          before do
+            allow(scorekeeper_role).to receive(:resource?).with(first_resource).and_return false
+            allow(scorekeeper_role).to receive(:resource?).with(second_resource).and_return false
+            allow(scorekeeper_role).to receive(:to_role_string).and_return "scorekeeper"
+          end
 
-        it { expect(subject.allow?(nil, nil, resource)).to be false }
-        it { expect(subject.allow?([scorekeeper_role], "index", resource)).to be false }
-        it { expect(subject.allow?([scorekeeper_role], "edit", resource)).to be false }
-      end
-
-      describe "resource matches" do
-        let(:resource) { { resource: ['Organization', 123] } }
-
-        before do
-          allow(scorekeeper_role).to receive(:resource?).with(resource[:resource]).and_return true
+          it { expect(subject.allow?(nil, nil, resource)).to be false }
+          it { expect(subject.allow?([scorekeeper_role], "index", resource)).to be false }
+          it { expect(subject.allow?([scorekeeper_role], "edit", resource)).to be false }
         end
 
-        it { expect(subject.allow?(nil, nil, resource)).to be false }
-        it { expect(subject.allow?([scorekeeper_role], "index", resource)).to be true }
-        it { expect(subject.allow?([scorekeeper_role], "edit", resource)).to be false }
+        describe 'one of the resources match' do
+          before do
+            allow(scorekeeper_role).to receive(:resource?).with(first_resource).and_return false
+            allow(scorekeeper_role).to receive(:resource?).with(second_resource).and_return true
+          end
+
+          it { expect(subject.allow?(nil, nil, resource)).to be false }
+          it { expect(subject.allow?([scorekeeper_role], "index", resource)).to be true }
+          it { expect(subject.allow?([scorekeeper_role], "edit", resource)).to be false }
+        end
       end
+
     end
   end
 end
