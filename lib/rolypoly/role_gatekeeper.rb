@@ -84,8 +84,19 @@ module Rolypoly
 
     private def allowed_resource?(check_role, required_resource)
       return true unless require_resource?
+      return false unless check_role.respond_to?(:resource?)
 
-      check_role.respond_to?(:resource?) && check_role.resource?(required_resource)
+      if resources?(required_resource)
+        required_resource.any? do |r|
+          check_role.resource?(r)
+        end
+      else
+        check_role.resource?(required_resource)
+      end
+    end
+
+    private def resources?(resources)
+      resources.is_a?(Array) && !%w(String Symbol).include?(resources.first.class.name)
     end
 
     private def find_required_resource(options = {})
