@@ -14,13 +14,13 @@ module Rolypoly
 
       def self.included(base)
         unless base.method_defined?(:current_user_roles)
-          define_method(:current_user_roles) do
+          base.send(:define_method, :current_user_roles) do
             []
           end
         end
 
         unless base.method_defined?(:rolypoly_resource_map)
-          define_method(:rolypoly_resource_map) do
+          base.send(:define_method, :rolypoly_resource_map) do
             {}
           end
         end
