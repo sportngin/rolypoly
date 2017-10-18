@@ -86,17 +86,12 @@ module Rolypoly
       return true unless require_resource?
       return false unless check_role.respond_to?(:resource?)
 
-      if resources?(required_resource)
-        required_resource.any? do |r|
-          check_role.resource?(r)
-        end
-      else
-        check_role.resource?(required_resource)
-      end
+      required_resources = array_resource?(required_resource) ? [required_resource] : Array(required_resource)
+      required_resources.any? {|r| check_role.resource?(r) }
     end
 
-    private def resources?(resources)
-      resources.is_a?(Array) && !%w(String Symbol).include?(resources.first.class.name)
+    private def array_resource?(resources)
+      resources.is_a?(Array) && %w(String Symbol).include?(resources.first.class.name)
     end
 
     private def find_required_resource(options = {})
