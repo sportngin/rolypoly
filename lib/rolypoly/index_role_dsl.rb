@@ -28,11 +28,7 @@ module IndexRoleDSL
     def apply_scopes
       return query if role_scopes.all_access?(current_user_roles)
       return query.none if scope_hash.empty?
-      if scope_hash.keys.length == 1
-        return scope_hash.inject(query) { |query, (scope_name, ids)| query.or(query.public_send(scope_name, ids)) }
-      else
-        raise NotImplementedError, 'Add ability to OR multiple scopes together' # TODO: Add ability to OR multiple scopes together
-      end
+      return scope_hash.inject(query) { |query, (scope_name, ids)| query.or(query.public_send(scope_name, ids)) }
     end
 
     def scope_hash
