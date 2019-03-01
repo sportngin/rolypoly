@@ -1,5 +1,6 @@
 require 'forwardable'
 require 'role_scope'
+require 'rubygems'
 
 module IndexRoleDSL
 
@@ -10,6 +11,8 @@ module IndexRoleDSL
 
   module InstanceMethods
     extend Forwardable
+
+  rescue_from NoMethodError, with: :check_rails
 
     def self.included(base)
       unless base.method_defined?(:current_user_roles)
@@ -38,6 +41,15 @@ module IndexRoleDSL
 
     def allowed_roles(scope_name)
       role_scopes.allowed_roles(current_user_roles, scope_name)
+    end
+
+    protected def check_rails
+      rails_gem = Gem::Specification.select {|z| z.name == "rails"}.max_by {|a| a.version}
+      if Gem::Version.new(rails_gem.version.version) < Gem::Version.new('5.0.0')
+        rescue_error status: 500, message: 'It appears you are using Rails version 4.X.X or lower, please install the "where-or" gem or upgrade to rails 5.X.X'
+      else
+        rescue_error status: 500, message: 'RolyPoly error'
+      end
     end
   end
 
