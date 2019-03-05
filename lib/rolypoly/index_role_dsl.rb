@@ -80,7 +80,7 @@ module Rolypoly
       def_delegators :role_scopes, :all_public, :allow, :allowed_roles, :on
 
       def role_scopes
-        @role_scopes ||= RoleScopes.new
+        @role_scopes ||= Rolypoly::RoleScopes.new
       end
     end
   end

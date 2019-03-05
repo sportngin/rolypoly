@@ -43,7 +43,7 @@ module Rolypoly
     end
 
     private def build_role_scope(roles = nil, actions = nil, resource = nil)
-      new_role_scope = RoleScope.new(roles, actions, resource)
+      new_role_scope = Rolypoly::RoleScope.new(roles, actions, resource)
       @role_scopes << new_role_scope
       new_role_scope
     end
