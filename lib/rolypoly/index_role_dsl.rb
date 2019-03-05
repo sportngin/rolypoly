@@ -5,7 +5,6 @@ require 'rubygems'
 module IndexRoleDSL
 
   def self.included(base)
-    base.before_filter(:check_where_or) if base.respond_to? :before_filter
     base.extend(ClassMethods)
     base.send(:include, InstanceMethods)
   end
@@ -62,22 +61,6 @@ module IndexRoleDSL
 
     def allowed_roles(scope_name)
       role_scopes.allowed_roles(current_user_roles, scope_name)
-    end
-
-    protected def check_rails
-      rails_gem = Gem::Specification.select {|z| z.name == "rails"}.max_by {|a| a.version}
-      if Gem::Version.new(rails_gem.version.version) < Gem::Version.new('5.0.0')
-        true
-      else
-        false
-      end
-    end
-
-    protected def check_where_or
-      whereor_gem = Gem::Specification.select {|z| z.name == "where-or"}
-      unless whereor_gem && check_rails
-        rescue_error status: 500, message: 'It appears you are using Rails version 4.X.X or lower, please install the "where-or" gem or upgrade to rails 5.X.X'
-      end
     end
   end
 
