@@ -27,8 +27,34 @@ module IndexRoleDSL
     def apply_scopes
       return query if role_scopes.all_access?(current_user_roles)
       return query.none if scope_hash.empty?
-      return scope_hash.inject(query) { |query, (scope_name, ids)| query.or(query.public_send(scope_name, ids)) }
+      if scope_hash.keys.length == 1
+        scope_hash.inject(query) { |query, (scope_name, ids)| query.public_send(scope_name, ids) }
+      else
+        object_query = query
+        object_query = join_tables.inject(object_query) do |q, join_table|
+          q.joins(join_table)
+        end
+
+        return scope_hash.inject(object_query) do |object_query, (scope_name, ids)|
+          object_query.or(query.public_send(scope_name, ids))
+        end
+      end
     end
+
+    def join_tables
+      scope_hash.map do |scope_name, ids|
+        query.public_send(scope_name, ids).values[:joins]
+      end
+        .flatten
+        .uniq
+        .reject { |join_table| query_join_tables.include?(join_table) }
+    end
+
+    def query_join_tables
+       values = query.try(:values) || {}
+       values.fetch(:joins, [])
+    end
+
 
     def scope_hash
       @scope_hash ||= role_scopes.scope_hash(current_user_roles)
