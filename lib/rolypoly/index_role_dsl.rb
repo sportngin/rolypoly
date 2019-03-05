@@ -29,6 +29,10 @@ module IndexRoleDSL
       if scope_hash.keys.length == 1
         scope_hash.inject(query) { |query, (scope_name, ids)| query.public_send(scope_name, ids) }
       else
+        # This block is designed to handle cases of more than one scope.
+        # The following code has been demonstrated to perform on most "simple"...
+        #...objects and scopes. However, there are certain complex objects...
+        #...and scopes that cause permission checks to fail.
         object_query = query
         object_query = join_tables.inject(object_query) do |q, join_table|
           q.joins(join_table)
