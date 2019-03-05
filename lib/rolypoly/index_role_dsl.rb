@@ -34,7 +34,7 @@ module IndexRoleDSL
           q.joins(join_table)
         end
 
-        return scope_hash.inject(object_query) do |object_query, (scope_name, ids)|
+        scope_hash.inject(object_query) do |object_query, (scope_name, ids)|
           object_query.or(query.public_send(scope_name, ids))
         end
       end
