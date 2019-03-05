@@ -19,6 +19,8 @@ And then execute:
 $> bundle
 ```
 
+NOTE: If your application is running Rails 4.X.X or lower, please ensure your application also includes the `where-or` gem.
+
 ## Custom Usage
 
 ```ruby
