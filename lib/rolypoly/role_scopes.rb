@@ -1,5 +1,5 @@
 require 'forwardable'
-require 'role_scope'
+require 'rolypoly/role_scope'
 
 module Rolypoly
   class RoleScopes

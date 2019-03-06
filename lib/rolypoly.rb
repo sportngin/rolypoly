@@ -1,5 +1,6 @@
 require "rolypoly/version"
 require 'rolypoly/controller_role_dsl'
+require 'rolypoly/resource_index_query_builder'
 
 module Rolypoly
 

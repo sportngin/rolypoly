@@ -1,6 +1,5 @@
 require 'forwardable'
-require 'role_scope'
-require 'rubygems'
+require 'rolypoly/role_scopes'
 
 module Rolypoly
   module IndexRoleDSL

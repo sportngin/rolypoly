@@ -1,6 +1,8 @@
+require 'rolypoly/index_role_dsl'
+
 module Rolypoly
   class ResourceIndexQueryBuilder
-    include IndexRoleDSL
+    include Rolypoly::IndexRoleDSL
 
     attr_reader :query, :user
 
