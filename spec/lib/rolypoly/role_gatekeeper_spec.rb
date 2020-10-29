@@ -214,12 +214,20 @@ module Rolypoly
         end
 
         it 'returns the matching role' do
-          expect(roles[1]).to receive(:resource?).with(['Organization', '1']).and_return(true)
-          expect(subject.allowed_roles(roles, 'index', organization: ['Organization', '1'])).to eq([roles[1]])
+          query = ['Organization', '1']
+          expect(roles[1]).to receive(:resource?).with(query).and_return(true)
+          expect(subject.allowed_roles(roles, 'index', organization: query)).to eq([roles[1]])
         end
 
         it 'returns all roles with the same resource_type' do
-          expect(subject.allowed_roles(roles, 'index', organization: { resource_type: 'Organization'})).to eq([roles[1], roles[2]])
+          query = { resource_type: 'Organization' }
+          expect(subject.allowed_roles(roles, 'index', organization: query)).to eq([roles[1], roles[2]])
+        end
+
+        it 'returns only the role matching the resource? call' do
+          query = { resource_id: '1', resource_type: 'Organization' }
+          expect(roles[1]).to receive(:resource?).with(query).and_return(true)
+          expect(subject.allowed_roles(roles, 'index', organization: query)).to eq([roles[1]])
         end
       end
     end

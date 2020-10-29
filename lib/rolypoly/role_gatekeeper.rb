@@ -86,10 +86,10 @@ module Rolypoly
       return true unless require_resource?
 
       case required_resource
-      when ->(r) { r.is_a?(Hash) && r[:resource_type] }
+      when ->(r) { r.is_a?(Hash) && r.keys == [:resource_type] }
         check_role.respond_to?(:resource_type) &&
           check_role.resource_type == required_resource[:resource_type]
-      when ->(r) { type_id_resource?(r) }
+      when Hash, ->(r) { type_id_resource?(r) }
         check_role.respond_to?(:resource?) &&
           check_role.resource?(required_resource)
       else
