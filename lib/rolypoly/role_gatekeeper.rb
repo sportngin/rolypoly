@@ -84,10 +84,18 @@ module Rolypoly
 
     private def allowed_resource?(check_role, required_resource)
       return true unless require_resource?
-      return false unless check_role.respond_to?(:resource?)
 
-      required_resources = type_id_resource?(required_resource) ? [required_resource] : Array(required_resource)
-      required_resources.any? {|r| check_role.resource?(r) }
+      case required_resource
+      when ->(r) { r.is_a?(Hash) && r[:resource_type] }
+        check_role.respond_to?(:resource_type) &&
+          check_role.resource_type == required_resource[:resource_type]
+      when ->(r) { type_id_resource?(r) }
+        check_role.respond_to?(:resource?) &&
+          check_role.resource?(required_resource)
+      else
+        check_role.respond_to?(:resource?) &&
+          Array(required_resource).any? {|r| check_role.resource?(r) }
+      end
     end
 
     private def type_id_resource?(required_resource)
