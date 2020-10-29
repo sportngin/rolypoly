@@ -189,5 +189,47 @@ module Rolypoly
       end
 
     end
+
+    context 'allowed_roles' do
+      let(:roles) do
+        [double('admin', to_role_string: 'admin', resource?: nil),
+         double('org 1 admin',  resource_id: '1', resource_type: 'Organization', to_role_string: 'org_admin', resource?: nil),
+         double('org 2 admin',  resource_id: '2', resource_type: 'Organization', to_role_string: 'org_admin', resource?: nil),
+         double('tenant admin', resource_id: '3', resource_type: 'Tenant',       to_role_string: 'org_admin', resource?: nil)]
+      end
+
+      context 'with unscoped gatekeeper' do
+        subject { described_class.new(['admin'], ['index']) }
+
+        it 'returns the unscoped role' do
+          expect(subject.allowed_roles(roles, 'index')).to eq([roles[0]])
+        end
+      end
+
+      context 'with resource-scoped gatekeeper' do
+        subject { described_class.new(['org_admin'], ['index'], :organization) }
+
+        it 'returns no roles' do
+          expect(subject.allowed_roles(roles, 'index')).to be_empty
+        end
+
+        it 'returns the matching role' do
+          query = ['Organization', '1']
+          expect(roles[1]).to receive(:resource?).with(query).and_return(true)
+          expect(subject.allowed_roles(roles, 'index', organization: query)).to eq([roles[1]])
+        end
+
+        it 'returns all roles with the same resource_type' do
+          query = { resource_type: 'Organization' }
+          expect(subject.allowed_roles(roles, 'index', organization: query)).to eq([roles[1], roles[2]])
+        end
+
+        it 'returns only the role matching the resource? call' do
+          query = { resource_id: '1', resource_type: 'Organization' }
+          expect(roles[1]).to receive(:resource?).with(query).and_return(true)
+          expect(subject.allowed_roles(roles, 'index', organization: query)).to eq([roles[1]])
+        end
+      end
+    end
   end
 end
