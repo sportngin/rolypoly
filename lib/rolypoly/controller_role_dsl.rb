@@ -5,12 +5,12 @@ module Rolypoly
   module ControllerRoleDSL
 
     def self.included(sub)
-      if sub.respond_to? :before_filter
-        sub.before_filter(:rolypoly_check_role_access!)
-      elsif sub.respond_to? :before_action
+      if sub.respond_to? :before_action
         sub.before_action(:rolypoly_check_role_access!)
+      elsif sub.respond_to? :before_filter
+        sub.before_filter(:rolypoly_check_role_access!)
       end
-        if sub.respond_to? :rescue_from
+      if sub.respond_to? :rescue_from
         sub.rescue_from(FailedRoleCheckError) do
           respond_to do |f|
             f.html { render plain: "Not Authorized", status: 401 }
